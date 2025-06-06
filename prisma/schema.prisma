@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  teams     TeamMember[]
+  tasks     Task[]   @relation("AssignedTasks")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Team {
+  id        String        @id @default(uuid())
+  name      String
+  ownerId   String
+  members   TeamMember[]
+  tasks     Task[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id     String @id @default(uuid())
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  createdAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  status      String   @default("pendente") // pendente, andamento, concluída
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId      String
+  assignedTo  User?    @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  assignedToId String?
+  dueDate     DateTime?
+  priority    String @default("medium")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tasks")
+}
