@@ -1,25 +1,40 @@
-const express = require("express")
-const { body } = require("express-validator")
-const { register, login, getProfile } = require("../controllers/authController")
-const { authenticateToken } = require("../middleware/auth")
+const express = require("express");
+const { body } = require("express-validator");
+const {
+  register,
+  login,
+  getProfile,
+} = require("../controllers/authController");
+const { authenticateToken } = require("../middleware/auth");
 
-const router = express.Router()
+const router = express.Router();
 
-// Validation rules
+// Regras de validação (Validation rules)
 const registerValidation = [
-  body("name").trim().isLength({ min: 2, max: 50 }).withMessage("Name must be between 2 and 50 characters"),
-  body("email").isEmail().normalizeEmail().withMessage("Please provide a valid email"),
-  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
-]
+  body("name")
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage("O nome deve ter entre 2 e 50 caracteres"),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Por favor, forneça um email válido"),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("A senha deve ter pelo menos 6 caracteres"),
+];
 
 const loginValidation = [
-  body("email").isEmail().normalizeEmail().withMessage("Please provide a valid email"),
-  body("password").notEmpty().withMessage("Password is required"),
-]
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Por favor, forneça um email válido"),
+  body("password").notEmpty().withMessage("A senha é obrigatória"),
+];
 
-// Routes
-router.post("/register", registerValidation, register)
-router.post("/login", loginValidation, login)
-router.get("/profile", authenticateToken, getProfile)
+// Rotas (Routes)
+router.post("/register", registerValidation, register);
+router.post("/login", loginValidation, login);
+router.get("/profile", authenticateToken, getProfile);
 
-module.exports = router
+module.exports = router;

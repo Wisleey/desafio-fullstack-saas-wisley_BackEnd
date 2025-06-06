@@ -11,26 +11,26 @@ const { authenticateToken } = require("../middleware/auth");
 
 const router = express.Router();
 
-// Validation rules
+// Regras de validação
 const createTaskValidation = [
   body("title")
     .trim()
     .isLength({ min: 2, max: 200 })
-    .withMessage("Task title must be between 2 and 200 characters"),
+    .withMessage("O título da tarefa deve ter entre 2 e 200 caracteres"),
   body("description")
     .trim()
     .isLength({ min: 5, max: 1000 })
-    .withMessage("Task description must be between 5 and 1000 characters"),
-  body("teamId").isUUID().withMessage("Valid team ID is required"),
+    .withMessage("A descrição da tarefa deve ter entre 5 e 1000 caracteres"),
+  body("teamId").isUUID().withMessage("ID do time válido é obrigatório"),
   body("dueDate")
     .optional()
     .isISO8601()
     .toDate()
-    .withMessage("Valid due date is required"),
+    .withMessage("Data de vencimento válida é obrigatória"),
   body("priority")
     .optional()
-    .isIn(["low", "medium", "high"])
-    .withMessage("Priority must be low, medium, or high"),
+    .isIn(["baixa", "média", "alta"])
+    .withMessage("A prioridade deve ser: baixa, média ou alta"),
 ];
 
 const updateTaskValidation = [
@@ -38,22 +38,22 @@ const updateTaskValidation = [
     .optional()
     .trim()
     .isLength({ min: 2, max: 200 })
-    .withMessage("Task title must be between 2 and 200 characters"),
+    .withMessage("O título da tarefa deve ter entre 2 e 200 caracteres"),
   body("description")
     .optional()
     .trim()
     .isLength({ min: 5, max: 1000 })
-    .withMessage("Task description must be between 5 and 1000 characters"),
+    .withMessage("A descrição da tarefa deve ter entre 5 e 1000 caracteres"),
   body("status")
     .optional()
     .isIn(["pendente", "andamento", "concluída"])
-    .withMessage("Status must be: pendente, andamento, or concluída"),
+    .withMessage("O status deve ser: pendente, andamento ou concluída"),
 ];
 
-// Apply authentication to all routes
+// Aplica autenticação em todas as rotas
 router.use(authenticateToken);
 
-// Routes
+// Rotas
 router.post("/", createTaskValidation, createTask);
 router.get("/", getTasks);
 router.get("/:id", getTaskById);

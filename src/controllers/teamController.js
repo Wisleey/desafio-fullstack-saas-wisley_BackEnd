@@ -39,12 +39,12 @@ const createTeam = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Team created successfully",
+      message: "Time criado com sucesso",
       team,
     });
   } catch (error) {
-    console.error("Create team error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao criar time:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -76,8 +76,8 @@ const getTeams = async (req, res) => {
 
     res.json({ teams });
   } catch (error) {
-    console.error("Get teams error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao buscar times:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -126,13 +126,13 @@ const getTeamById = async (req, res) => {
     if (!team) {
       return res
         .status(404)
-        .json({ message: "Team not found or access denied" });
+        .json({ message: "Time não encontrado ou acesso negado" });
     }
 
     res.json({ team });
   } catch (error) {
-    console.error("Get team error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao buscar time:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -146,7 +146,7 @@ const addMember = async (req, res) => {
     const { id } = req.params;
     const { email } = req.body;
 
-    // Check if team exists and user is a member
+    // Verifica se o time existe e o usuário é membro
     const team = await prisma.team.findFirst({
       where: {
         id,
@@ -161,10 +161,10 @@ const addMember = async (req, res) => {
     if (!team) {
       return res
         .status(404)
-        .json({ message: "Team not found or access denied" });
+        .json({ message: "Time não encontrado ou acesso negado" });
     }
 
-    // Find user by email
+    // Encontra usuário por email
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -172,10 +172,10 @@ const addMember = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ message: "User not found with this email" });
+        .json({ message: "Usuário não encontrado com este email" });
     }
 
-    // Check if user is already a member
+    // Verifica se o usuário já é membro
     const existingMember = await prisma.teamMember.findFirst({
       where: {
         teamId: id,
@@ -186,10 +186,10 @@ const addMember = async (req, res) => {
     if (existingMember) {
       return res
         .status(400)
-        .json({ message: "User is already a member of this team" });
+        .json({ message: "Usuário já é membro deste time" });
     }
 
-    // Add member
+    // Adiciona membro
     const member = await prisma.teamMember.create({
       data: {
         teamId: id,
@@ -207,12 +207,12 @@ const addMember = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Member added successfully",
+      message: "Membro adicionado com sucesso",
       member,
     });
   } catch (error) {
-    console.error("Add member error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao adicionar membro:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -220,7 +220,7 @@ const removeMember = async (req, res) => {
   try {
     const { id, memberId } = req.params;
 
-    // Check if team exists and user is a member
+    // Verifica se o time existe e o usuário é membro
     const team = await prisma.team.findFirst({
       where: {
         id,
@@ -235,10 +235,10 @@ const removeMember = async (req, res) => {
     if (!team) {
       return res
         .status(404)
-        .json({ message: "Team not found or access denied" });
+        .json({ message: "Time não encontrado ou acesso negado" });
     }
 
-    // Remove member
+    // Remove membro
     const deletedMember = await prisma.teamMember.deleteMany({
       where: {
         teamId: id,
@@ -247,13 +247,15 @@ const removeMember = async (req, res) => {
     });
 
     if (deletedMember.count === 0) {
-      return res.status(404).json({ message: "Member not found in this team" });
+      return res
+        .status(404)
+        .json({ message: "Membro não encontrado neste time" });
     }
 
-    res.json({ message: "Member removed successfully" });
+    res.json({ message: "Membro removido com sucesso" });
   } catch (error) {
-    console.error("Remove member error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao remover membro:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -261,7 +263,7 @@ const requestTeamMembership = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Check if team exists
+    // Verifica se o time existe
     const team = await prisma.team.findUnique({
       where: { id },
       include: {
@@ -276,10 +278,10 @@ const requestTeamMembership = async (req, res) => {
     });
 
     if (!team) {
-      return res.status(404).json({ message: "Team not found" });
+      return res.status(404).json({ message: "Time não encontrado" });
     }
 
-    // Check if user is already a member
+    // Verifica se o usuário já é membro
     const existingMember = await prisma.teamMember.findFirst({
       where: {
         teamId: id,
@@ -288,12 +290,10 @@ const requestTeamMembership = async (req, res) => {
     });
 
     if (existingMember) {
-      return res
-        .status(400)
-        .json({ message: "You are already a member of this team" });
+      return res.status(400).json({ message: "Você já é membro deste time" });
     }
 
-    // Add member
+    // Adiciona membro
     const member = await prisma.teamMember.create({
       data: {
         teamId: id,
@@ -311,16 +311,16 @@ const requestTeamMembership = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Successfully joined the team",
+      message: "Juntou-se ao time com sucesso",
       member,
     });
   } catch (error) {
-    console.error("Request team membership error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao solicitar adesão ao time:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
-// Nova função para listar membros de um time
+// Função para listar membros de um time
 const getTeamMembers = async (req, res) => {
   try {
     const { id } = req.params; // id do time
@@ -340,7 +340,7 @@ const getTeamMembers = async (req, res) => {
     if (!team) {
       return res
         .status(404)
-        .json({ message: "Team not found or access denied" });
+        .json({ message: "Time não encontrado ou acesso negado" });
     }
 
     // Buscar os membros do time com as informações do usuário
@@ -363,12 +363,12 @@ const getTeamMembers = async (req, res) => {
     // Retornar a lista de membros (incluindo as informações do usuário)
     res.json({ members: teamMembers });
   } catch (error) {
-    console.error("Get team members error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao buscar membros do time:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
-// Nova função para atualizar um time
+// Função para atualizar um time
 const updateTeam = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -390,7 +390,7 @@ const updateTeam = async (req, res) => {
     if (!team) {
       return res
         .status(404)
-        .json({ message: "Team not found or access denied" });
+        .json({ message: "Time não encontrado ou acesso negado" });
     }
 
     // Atualizar o time
@@ -412,10 +412,10 @@ const updateTeam = async (req, res) => {
       },
     });
 
-    res.json({ message: "Team updated successfully", team: updatedTeam });
+    res.json({ message: "Time atualizado com sucesso", team: updatedTeam });
   } catch (error) {
-    console.error("Update team error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao atualizar time:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -445,8 +445,8 @@ const deleteTeam = async (req, res) => {
 
     res.json({ message: "Time excluído com sucesso" });
   } catch (error) {
-    console.error("Delete team error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao excluir time:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -459,5 +459,5 @@ module.exports = {
   requestTeamMembership,
   getTeamMembers,
   updateTeam,
-  deleteTeam, // Exportar a nova função
+  deleteTeam,
 };

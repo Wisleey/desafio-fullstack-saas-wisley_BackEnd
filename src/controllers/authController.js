@@ -1,38 +1,40 @@
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
-const { PrismaClient } = require("@prisma/client")
-const { validationResult } = require("express-validator")
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { PrismaClient } = require("@prisma/client");
+const { validationResult } = require("express-validator");
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  })
-}
+  });
+};
 
 const register = async (req, res) => {
   try {
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password } = req.body
+    const { name, email, password } = req.body;
 
-    // Check if user already exists
+    // Verifica se o usuário já existe
     const existingUser = await prisma.user.findUnique({
       where: { email },
-    })
+    });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists with this email" })
+      return res
+        .status(400)
+        .json({ message: "Já existe um usuário com este email" });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    // Criptografa a senha
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user
+    // Cria o usuário
     const user = await prisma.user.create({
       data: {
         name,
@@ -45,63 +47,63 @@ const register = async (req, res) => {
         email: true,
         createdAt: true,
       },
-    })
+    });
 
-    // Generate token
-    const token = generateToken(user.id)
+    // Gera o token
+    const token = generateToken(user.id);
 
     res.status(201).json({
-      message: "User created successfully",
+      message: "Usuário criado com sucesso",
       user,
       token,
-    })
+    });
   } catch (error) {
-    console.error("Register error:", error)
-    res.status(500).json({ message: "Internal server error" })
+    console.error("Erro no registro:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
-}
+};
 
 const login = async (req, res) => {
   try {
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
-    // Find user
+    // Busca o usuário
     const user = await prisma.user.findUnique({
       where: { email },
-    })
+    });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" })
+      return res.status(401).json({ message: "Credenciais inválidas" });
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password)
+    // Verifica a senha
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" })
+      return res.status(401).json({ message: "Credenciais inválidas" });
     }
 
-    // Generate token
-    const token = generateToken(user.id)
+    // Gera o token
+    const token = generateToken(user.id);
 
     res.json({
-      message: "Login successful",
+      message: "Login realizado com sucesso",
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
       },
       token,
-    })
+    });
   } catch (error) {
-    console.error("Login error:", error)
-    res.status(500).json({ message: "Internal server error" })
+    console.error("Erro no login:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
-}
+};
 
 const getProfile = async (req, res) => {
   try {
@@ -113,21 +115,21 @@ const getProfile = async (req, res) => {
         email: true,
         createdAt: true,
       },
-    })
+    });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" })
+      return res.status(404).json({ message: "Usuário não encontrado" });
     }
 
-    res.json({ user })
+    res.json({ user });
   } catch (error) {
-    console.error("Get profile error:", error)
-    res.status(500).json({ message: "Internal server error" })
+    console.error("Erro ao buscar perfil:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
-}
+};
 
 module.exports = {
   register,
   login,
   getProfile,
-}
+};

@@ -13,7 +13,7 @@ const createTask = async (req, res) => {
     const { title, description, teamId, assignedToId, dueDate, priority } =
       req.body;
 
-    // Check if team exists and user is a member
+    // Verifica se o time existe e o usuário é membro
     const team = await prisma.team.findFirst({
       where: {
         id: teamId,
@@ -28,10 +28,10 @@ const createTask = async (req, res) => {
     if (!team) {
       return res
         .status(404)
-        .json({ message: "Team not found or access denied" });
+        .json({ message: "Time não encontrado ou acesso negado" });
     }
 
-    // If assignedToId is provided, check if user is a team member
+    // Se assignedToId for fornecido, verifica se o usuário é membro do time
     if (assignedToId) {
       const assignedUser = await prisma.teamMember.findFirst({
         where: {
@@ -43,7 +43,7 @@ const createTask = async (req, res) => {
       if (!assignedUser) {
         return res
           .status(400)
-          .json({ message: "Assigned user is not a member of this team" });
+          .json({ message: "Usuário atribuído não é membro deste time" });
       }
     }
 
@@ -74,12 +74,12 @@ const createTask = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Task created successfully",
+      message: "Tarefa criada com sucesso",
       task,
     });
   } catch (error) {
-    console.error("Create task error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao criar tarefa:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -125,8 +125,8 @@ const getTasks = async (req, res) => {
 
     res.json({ tasks });
   } catch (error) {
-    console.error("Get tasks error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao buscar tarefas:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -165,13 +165,13 @@ const getTaskById = async (req, res) => {
     if (!task) {
       return res
         .status(404)
-        .json({ message: "Task not found or access denied" });
+        .json({ message: "Tarefa não encontrada ou acesso negado" });
     }
 
     res.json({ task });
   } catch (error) {
-    console.error("Get task error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao buscar tarefa:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 
@@ -185,7 +185,7 @@ const updateTask = async (req, res) => {
     const { id } = req.params;
     const { title, description, status, assignedToId } = req.body;
 
-    // Check if task exists and user has access
+    // Verifica se a tarefa existe e o usuário tem acesso
     const existingTask = await prisma.task.findFirst({
       where: {
         id,
@@ -202,10 +202,10 @@ const updateTask = async (req, res) => {
     if (!existingTask) {
       return res
         .status(404)
-        .json({ message: "Task not found or access denied" });
+        .json({ message: "Tarefa não encontrada ou acesso negado" });
     }
 
-    // If assignedToId is provided, check if user is a team member
+    // Se assignedToId for fornecido, verifica se o usuário é membro do time
     if (assignedToId) {
       const assignedUser = await prisma.teamMember.findFirst({
         where: {
@@ -217,16 +217,32 @@ const updateTask = async (req, res) => {
       if (!assignedUser) {
         return res
           .status(400)
-          .json({ message: "Assigned user is not a member of this team" });
+          .json({ message: "Usuário atribuído não é membro deste time" });
       }
     }
 
+    // Buscar a tarefa existente novamente com assignedTo incluído para criar a notificação
+    const taskBeforeUpdate = await prisma.task.findUnique({
+      where: { id },
+      select: {
+        status: true,
+        title: true,
+        assignedToId: true,
+        assignedTo: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Realiza a atualização da tarefa
     const task = await prisma.task.update({
       where: { id },
       data: {
-        ...(title && { title }),
-        ...(description && { description }),
-        ...(status && { status }),
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+        ...(status !== undefined && { status }),
         ...(assignedToId !== undefined && { assignedToId }),
       },
       include: {
@@ -246,6 +262,29 @@ const updateTask = async (req, res) => {
       },
     });
 
+    // --- Lógica para criar Notificação In-App ---
+    // Verificar se o status mudou E se a tarefa está atribuída a um usuário
+    if (
+      status !== undefined &&
+      status !== taskBeforeUpdate?.status &&
+      task.assignedToId
+    ) {
+      try {
+        await prisma.notification.create({
+          data: {
+            userId: task.assignedToId,
+            message: `O status da tarefa "${task.title}" foi alterado para "${task.status}".`,
+          },
+        });
+        console.log(
+          `Notificação criada para o usuário ${task.assignedToId} sobre a tarefa ${task.id}`
+        );
+      } catch (notificationError) {
+        console.error("Erro ao criar notificação:", notificationError);
+      }
+    }
+    // --- Fim da Lógica de Notificação ---
+
     res.json({
       message: "Task updated successfully",
       task,
@@ -260,7 +299,7 @@ const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Check if task exists and user has access
+    // Verifica se a tarefa existe e o usuário tem acesso
     const task = await prisma.task.findFirst({
       where: {
         id,
@@ -277,17 +316,17 @@ const deleteTask = async (req, res) => {
     if (!task) {
       return res
         .status(404)
-        .json({ message: "Task not found or access denied" });
+        .json({ message: "Tarefa não encontrada ou acesso negado" });
     }
 
     await prisma.task.delete({
       where: { id },
     });
 
-    res.json({ message: "Task deleted successfully" });
+    res.json({ message: "Tarefa excluída com sucesso" });
   } catch (error) {
-    console.error("Delete task error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Erro ao excluir tarefa:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
 

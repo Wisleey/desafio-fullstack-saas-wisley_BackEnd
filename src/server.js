@@ -6,6 +6,8 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const planRoutes = require("./routes/planRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,27 +26,32 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/plans", planRoutes);
+app.use("/api/notifications", notificationRoutes);
 
-// Health check
+// Verificação de saúde (Health check)
 app.get("/api/health", (req, res) => {
-  res.json({ message: "API is running!", timestamp: new Date().toISOString() });
+  res.json({
+    message: "API está rodando!",
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Error handling middleware
+// Middleware de tratamento de erro (Error handling middleware)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Erro no servidor:", err.stack);
   res.status(500).json({
-    message: "Something went wrong!",
+    message: "Algo deu errado!",
     error: process.env.NODE_ENV === "development" ? err.message : {},
   });
 });
 
-// 404 handler
+// Handler 404 (404 handler)
 app.use("*", (req, res) => {
-  res.status(404).json({ message: "Route not found" });
+  res.status(404).json({ message: "Rota não encontrada" });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`📊 Ambiente: ${process.env.NODE_ENV}`);
 });

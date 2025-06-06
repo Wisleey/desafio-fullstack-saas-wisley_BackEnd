@@ -10,6 +10,9 @@
     "generate": "npx prisma generate",
     "studio": "npx prisma studio"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
@@ -23,7 +26,14 @@
     "nodemon": "^3.0.1",
     "prisma": "^5.6.0"
   },
-  "keywords": ["nodejs", "express", "prisma", "postgresql", "jwt", "saas"],
+  "keywords": [
+    "nodejs",
+    "express",
+    "prisma",
+    "postgresql",
+    "jwt",
+    "saas"
+  ],
   "author": "Wisley",
   "license": "MIT"
 }

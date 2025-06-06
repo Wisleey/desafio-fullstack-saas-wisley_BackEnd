@@ -15,25 +15,25 @@ const { authenticateToken } = require("../middleware/auth");
 
 const router = express.Router();
 
-// Validation rules
+// Regras de validação
 const createTeamValidation = [
   body("name")
     .trim()
     .isLength({ min: 2, max: 100 })
-    .withMessage("Team name must be between 2 and 100 characters"),
+    .withMessage("O nome do time deve ter entre 2 e 100 caracteres"),
 ];
 
 const addMemberValidation = [
   body("email")
     .isEmail()
     .normalizeEmail()
-    .withMessage("Please provide a valid email"),
+    .withMessage("Por favor, forneça um email válido"),
 ];
 
-// Apply authentication to all routes
+// Aplica autenticação em todas as rotas
 router.use(authenticateToken);
 
-// Routes
+// Rotas
 router.post("/", createTeamValidation, createTeam);
 router.get("/", getTeams);
 router.get("/:id", getTeamById);
