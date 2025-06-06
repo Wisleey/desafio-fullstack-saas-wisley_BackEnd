@@ -419,6 +419,37 @@ const updateTeam = async (req, res) => {
   }
 };
 
+// Nova função para excluir um time
+const deleteTeam = async (req, res) => {
+  try {
+    const { id } = req.params; // id do time a ser excluído
+
+    // Verificar se o time existe e se o usuário logado é o proprietário
+    const team = await prisma.team.findFirst({
+      where: {
+        id,
+        ownerId: req.userId, // Apenas o proprietário pode excluir
+      },
+    });
+
+    if (!team) {
+      return res
+        .status(404)
+        .json({ message: "Time não encontrado ou acesso negado" });
+    }
+
+    // Excluir o time (as tasks e teamMembers devem ser excluídos em cascata pelo schema.prisma)
+    await prisma.team.delete({
+      where: { id },
+    });
+
+    res.json({ message: "Time excluído com sucesso" });
+  } catch (error) {
+    console.error("Delete team error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   createTeam,
   getTeams,
@@ -427,5 +458,6 @@ module.exports = {
   removeMember,
   requestTeamMembership,
   getTeamMembers,
-  updateTeam, // Exportar a nova função
+  updateTeam,
+  deleteTeam, // Exportar a nova função
 };

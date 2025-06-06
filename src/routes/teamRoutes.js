@@ -9,6 +9,7 @@ const {
   requestTeamMembership,
   getTeamMembers,
   updateTeam,
+  deleteTeam,
 } = require("../controllers/teamController");
 const { authenticateToken } = require("../middleware/auth");
 
@@ -37,6 +38,7 @@ router.post("/", createTeamValidation, createTeam);
 router.get("/", getTeams);
 router.get("/:id", getTeamById);
 router.put("/:id", updateTeam);
+router.delete("/:id", deleteTeam);
 router.post("/:id/members", addMemberValidation, addMember);
 router.get("/:id/members", getTeamMembers);
 router.post("/:id/request-membership", requestTeamMembership);
