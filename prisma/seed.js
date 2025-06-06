@@ -13,7 +13,7 @@ async function main() {
       duration: "annual",
     },
     {
-      // id: "e7a8e3c3-d43e-449b-a53a-b3a6d7c2e18f", // Opcional: usar o mesmo ID se quiser
+      // id: "e7a8e3c3-d43e-449b-a53a-b3a6d7c2e18f",
       name: "Plano Mensal",
       price: 9.99,
       duration: "monthly",
