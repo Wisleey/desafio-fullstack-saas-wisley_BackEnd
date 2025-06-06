@@ -12,10 +12,16 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// ✅ Liberar acesso tanto local quanto da Vercel
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://desafio-fullstack-saas-wisley.vercel.app",
+];
+
 // Middlewares
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -29,7 +35,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/plans", planRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-// Verificação de saúde (Health check)
+// Health check
 app.get("/api/health", (req, res) => {
   res.json({
     message: "API está rodando!",
@@ -37,7 +43,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Middleware de tratamento de erro (Error handling middleware)
+// Error handler
 app.use((err, req, res, next) => {
   console.error("Erro no servidor:", err.stack);
   res.status(500).json({
@@ -46,7 +52,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Handler 404 (404 handler)
+// 404 handler
 app.use("*", (req, res) => {
   res.status(404).json({ message: "Rota não encontrada" });
 });
