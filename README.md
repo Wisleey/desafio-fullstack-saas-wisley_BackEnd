@@ -4,92 +4,109 @@ Backend desenvolvido com Node.js, Express, Prisma e PostgreSQL para o sistema de
 
 ## 🛠️ Tecnologias
 
-- **Node.js** - Runtime JavaScript
+- **Node.js** - Runtime JavaScript (Verificar versão exata no `package.json`)
+- **React** - (Utilizado no Frontend - verificar versão no frontend/package.json)
 - **Express.js** - Framework web
-- **Prisma** - ORM para banco de dados
+- **Prisma** - ORM para banco de dados (Verificar versão exata no `package.json`)
 - **PostgreSQL** - Banco de dados relacional
 - **JWT** - Autenticação
 - **bcryptjs** - Hash de senhas
 - **express-validator** - Validação de dados
+- **CORS** - Configurado para permitir requisições do frontend
+
+## Frontend
+
+As instruções para instalação e execução do frontend podem ser encontradas no README.md correspondente no diretório `frontend/README.md`.
 
 ## 📁 Estrutura do Projeto
 
-\`\`\`
+```
 backend/
 ├── src/
-│   ├── controllers/        # Lógica de negócio
-│   │   ├── authController.js
-│   │   ├── teamController.js
-│   │   └── taskController.js
-│   ├── middleware/         # Middlewares
-│   │   └── auth.js
-│   ├── routes/            # Definição de rotas
-│   │   ├── authRoutes.js
-│   │   ├── teamRoutes.js
-│   │   ├── taskRoutes.js
-│   │   └── userRoutes.js
-│   ├── prisma/            # Schema do banco
+│   ├── controllers/        # Lógica de negócio (e.g., auth, team, task, plan)
+│   ├── middleware/         # Middlewares (e.g., auth)
+│   ├── routes/            # Definição de rotas (e.g., auth, team, task, user, plan, notification)
+│   ├── prisma/            # Schema do banco e seeds
+│   │   ├── migrations/
 │   │   └── schema.prisma
+│   │   └── seed.js
 │   └── server.js          # Servidor principal
-├── .env.example           # Exemplo de variáveis
-├── package.json
+├── .env.example           # Exemplo de variáveis de ambiente
+├── package.json           # Dependências e scripts
 └── README.md
-\`\`\`
+```
 
-## 🚀 Como Executar
+## 🚀 Como Configurar e Executar Localmente
 
-### 1. Instalar dependências
-\`\`\`bash
+Siga os passos abaixo para configurar e rodar o backend na sua máquina local:
+
+### 1. Clonar o repositório
+
+```bash
+git clone <URL_DO_SEU_REPOSITORIO_BACKEND>
+cd <diretorio_backend>
+```
+
+### 2. Instalar dependências
+
+```bash
 npm install
-\`\`\`
+```
 
-### 2. Configurar variáveis de ambiente
-\`\`\`bash
+### 3. Configurar variáveis de ambiente
+
+Copie o arquivo de exemplo e preencha com suas configurações:
+
+```bash
 cp .env.example .env
-\`\`\`
+```
 
-Edite o arquivo \`.env\` com suas configurações:
+Edite o arquivo `.env` com suas configurações de banco de dados, JWT Secret, porta, etc. Exemplo:
 
-\`\`\`env
-DATABASE_URL="postgresql://username:password@localhost:5432/task_management"
-JWT_SECRET="your-super-secret-jwt-key-here"
+```env
+DATABASE_URL="postgresql://seu_usuario:sua_senha@localhost:5432/seu_banco_de_dados?schema=public"
+JWT_SECRET="sua_chave_secreta_para_jwt"
 JWT_EXPIRES_IN="7d"
 PORT=3001
 NODE_ENV="development"
 FRONTEND_URL="http://localhost:3000"
-\`\`\`
+```
 
-### 3. Configurar banco de dados
-\`\`\`bash
-# Gerar cliente Prisma
+### 4. Configurar e Popular o Banco de Dados (Prisma)
+
+Primeiro, gere o cliente Prisma e aplique as migrações:
+
+```bash
 npx prisma generate
+npx prisma migrate dev --name initial_migration # Use um nome descritivo para sua migração inicial
+```
 
-# Executar migrações
-npx prisma migrate dev
+Em seguida, execute o script de seed para popular o banco de dados com dados iniciais (como planos de assinatura):
 
-# (Opcional) Abrir Prisma Studio
-npx prisma studio
-\`\`\`
+```bash
+npx prisma db seed
+```
 
-### 4. Executar o servidor
-\`\`\`bash
-# Desenvolvimento
+_(Opcional) Abrir Prisma Studio para visualizar e gerenciar seus dados:_ `npx prisma studio`
+
+### 5. Executar o Servidor
+
+```bash
 npm run dev
+```
 
-# Produção
-npm start
-\`\`\`
+O servidor estará rodando em `http://localhost:<PORTA_CONFIGURADA_NO_.ENV>` (por padrão, 3001).
 
-O servidor estará rodando em \`http://localhost:3001\`
-
-## 📚 API Endpoints
+## �� API Endpoints
 
 ### Autenticação
+
 - \`POST /api/auth/register\` - Cadastrar usuário
 - \`POST /api/auth/login\` - Login
 - \`GET /api/auth/profile\` - Perfil do usuário
 
 ### Times
+
 - \`POST /api/teams\` - Criar time
 - \`GET /api/teams\` - Listar times do usuário
 - \`GET /api/teams/:id\` - Detalhes do time
@@ -97,6 +114,7 @@ O servidor estará rodando em \`http://localhost:3001\`
 - \`DELETE /api/teams/:id/members/:memberId\` - Remover membro
 
 ### Tarefas
+
 - \`POST /api/tasks\` - Criar tarefa
 - \`GET /api/tasks\` - Listar tarefas (com filtros)
 - \`GET /api/tasks/:id\` - Detalhes da tarefa
@@ -104,6 +122,7 @@ O servidor estará rodando em \`http://localhost:3001\`
 - \`DELETE /api/tasks/:id\` - Deletar tarefa
 
 ### Usuários
+
 - \`GET /api/users\` - Listar usuários
 
 ## 🔒 Autenticação
@@ -120,6 +139,7 @@ Authorization: Bearer <seu-token-jwt>
 ### Modelos
 
 #### User
+
 - \`id\` - UUID único
 - \`name\` - Nome do usuário
 - \`email\` - Email único
@@ -127,18 +147,21 @@ Authorization: Bearer <seu-token-jwt>
 - \`createdAt\` - Data de criação
 
 #### Team
+
 - \`id\` - UUID único
 - \`name\` - Nome do time
 - \`ownerId\` - ID do proprietário
 - \`createdAt\` - Data de criação
 
 #### TeamMember
+
 - \`id\` - UUID único
 - \`teamId\` - ID do time
 - \`userId\` - ID do usuário
 - \`createdAt\` - Data de adição
 
 #### Task
+
 - \`id\` - UUID único
 - \`title\` - Título da tarefa
 - \`description\` - Descrição
@@ -155,11 +178,18 @@ Authorization: Bearer <seu-token-jwt>
 - \`npm run generate\` - Gerar cliente Prisma
 - \`npm run studio\` - Abrir Prisma Studio
 
-## 🔧 Configuração de Produção
+## 🔧 Configuração de Produção / Deployment
 
-1. Configure as variáveis de ambiente de produção
-2. Execute as migrações: \`npx prisma migrate deploy\`
-3. Inicie o servidor: \`npm start\`
+Para deploy em ambientes de produção (como Render, Vercel, etc.), certifique-se de:
+
+1. Configurar corretamente as variáveis de ambiente de produção.
+2. Executar as migrações (`npx prisma migrate deploy`).
+3. **Executar o script de seed (`npx prisma db seed` ou `node prisma/seed.js`) APÓS as migrações para popular o banco de dados.** Configure sua plataforma de hospedagem para rodar este comando no processo de build ou deploy.
+4. Iniciar o servidor (`npm start`).
+
+**Link do Backend Hospedado:**
+
+[INSERIR LINK DO BACKEND AQUI]
 
 ## 📝 Notas Importantes
 
