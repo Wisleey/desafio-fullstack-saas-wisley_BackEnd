@@ -64,26 +64,26 @@ model Task {
   @@map("tasks")
 }
 
-// Novo modelo para Planos de Assinatura
+
 model Plan {
   id        String   @id @default(uuid())
-  name      String   @unique // Nome do plano (ex: Mensal, Anual)
-  price     Float    // Preço simulado
-  duration  String   // Duração do plano (ex: 'monthly', 'annual')
-  users     User[]   // Relação inversa para saber quais usuários têm este plano
+  name      String   @unique 
+  price     Float   
+  duration  String   
+  users     User[]  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("plans")
 }
 
-// Novo modelo para Notificações In-App
+
 model Notification {
   id        String   @id @default(uuid())
-  userId    String   // O ID do usuário que deve receber a notificação
+  userId    String   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  message   String   // O conteúdo da notificação
-  read      Boolean  @default(false) // Indica se a notificação foi lida
+  message   String  
+  read      Boolean  @default(false) 
   createdAt DateTime @default(now())
 
   @@map("notifications")
