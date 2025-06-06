@@ -4,10 +4,10 @@
   "description": "Backend para Sistema de Gestão de Tarefas com Times",
   "main": "src/server.js",
   "scripts": {
+    "generate": "prisma generate",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "migrate": "npx prisma migrate dev",
-    "generate": "npx prisma generate",
     "studio": "npx prisma studio"
   },
   "prisma": {
